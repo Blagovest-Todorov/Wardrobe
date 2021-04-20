@@ -24,22 +24,7 @@ namespace Wardrobe
                     string[] dresses = clothesItems
                         .Split(",", StringSplitOptions.RemoveEmptyEntries);
 
-                    for (int j = 0; j < dresses.Length; j++)
-                    {
-                        string currDress = dresses[j];
-
-                        if (!clothes.ContainsKey(color))
-                        {
-                            clothes.Add(color, new Dictionary<string, int>());
-                        }
-
-                        if (!clothes[color].ContainsKey(currDress))
-                        {
-                            clothes[color].Add(currDress, 0);
-                        }
-
-                        clothes[color][currDress]++;
-                    }
+                    FillDictionary(clothes, dresses, color);                   
                 }
                 else
                 {
@@ -51,42 +36,34 @@ namespace Wardrobe
             string[] commandData = anotherCommand
                     .Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
-            if (commandData.Length <= 0 || !anotherCommand.Contains(" ") || commandData.Length >= 3)
+            bool isCommandValid = IsCommandValid(anotherCommand, commandData);
+
+            if (isCommandValid == false)
             {
-                PrintClothes(clothes);
+                PrintClothesIfCommandInvalid(clothes);
             }
-            else if (anotherCommand.Contains(" ") && commandData.Length == 2)// "{color} {clothing}"
+            else if (isCommandValid == true)// "{color} {clothing}"
             {    
                 string currColor = commandData[0];
                 string currClothe = commandData[1];
-
+                
                 if (clothes.ContainsKey(currColor) && clothes[currColor].ContainsKey(currClothe))
                 {
-                    // ToDo
-                    foreach (var color in clothes)  // kvp = Color
-                    {
-                        Console.WriteLine($"{color.Key} clothes:");
-
-                        foreach (var item in color.Value)   // color.Value - collection ,incide Dictionary
-                        {
-                            if (item.Key == currClothe && color.Key == currColor)
-                            {
-                                Console.WriteLine($"* {item.Key} - {item.Value} (found!)");
-                                continue;
-                            }
-
-                            Console.WriteLine($"* {item.Key} - {item.Value}");  // how to do (found!)
-                        }
-                    }
+                    PrintClothes(clothes, currColor, currClothe);                    
                 }
                 else
                 {
-                    PrintClothes(clothes);
+                    PrintClothesIfCommandInvalid(clothes);
                 }
             }            
         }
 
-        private static void PrintClothes(Dictionary<string, Dictionary<string, int>> clothes)
+        private static bool IsCommandValid(string anotherCommand, string[] commandData)
+        {
+            return anotherCommand.Contains(" ") && commandData.Length == 2;
+        }
+
+        private static void PrintClothes(Dictionary<string, Dictionary<string, int>> clothes, string currColor, string currClothe)
         {
             foreach (var color in clothes)  // kvp = Color
             {
@@ -94,7 +71,47 @@ namespace Wardrobe
 
                 foreach (var item in color.Value)   // color.Value - collection ,incide Dictionary
                 {
+                    if (item.Key == currClothe && color.Key == currColor)
+                    {
+                        Console.WriteLine($"* {item.Key} - {item.Value} (found!)");
+                        continue;
+                    }
+
                     Console.WriteLine($"* {item.Key} - {item.Value}");  // how to do (found!)
+                }
+            }
+        }
+
+        private static void FillDictionary(Dictionary<string, Dictionary<string, int>> clothes,
+           string[] dresses, string color)
+        {
+            for (int j = 0; j < dresses.Length; j++)
+            {
+                string currDress = dresses[j];
+
+                if (!clothes.ContainsKey(color))
+                {
+                    clothes.Add(color, new Dictionary<string, int>());
+                }
+
+                if (!clothes[color].ContainsKey(currDress))
+                {
+                    clothes[color].Add(currDress, 0);
+                }
+
+                clothes[color][currDress]++;
+            }
+        }
+
+        private static void PrintClothesIfCommandInvalid(Dictionary<string, Dictionary<string, int>> clothes)
+        {
+            foreach (var color in clothes)  // kvp = Color
+            {
+                Console.WriteLine($"{color.Key} clothes:");
+
+                foreach (var item in color.Value)   // color.Value - collection ,incide Dictionary
+                {
+                    Console.WriteLine($"* {item.Key} - {item.Value}"); 
                 }
             }  
         }
